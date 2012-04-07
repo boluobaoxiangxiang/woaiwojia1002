@@ -1,0 +1,11 @@
+use ExtUtils::MakeMaker;
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
+WriteMakefile(
+    'CC'                => '@CXX@',
+    'LD'                => '@CXX@',
+    'NAME'		=> 'Text::CaboCha',
+    'VERSION_FROM'	=> 'CaboCha.pm', # finds $VERSION
+    'INC'               => '-I@prefix@/include',
+    'LIBS'              => '-L@prefix@/lib @YAMCHA_LIBS@ -lcabocha'
+);

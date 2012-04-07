@@ -1,0 +1,11 @@
+cabocha ruby モジュール
+
+1. インストール
+
+   % ruby extconf.rb
+   % make
+   % su
+   # make install
+
+2. 使い方.
+   付属の test.rb を参照ください

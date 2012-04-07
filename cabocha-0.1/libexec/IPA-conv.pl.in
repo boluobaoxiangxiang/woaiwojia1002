@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+$| = 1;
+
+my $tag = "";
+while(<>) {
+    chomp;
+    next if (/^\#/);
+    if (/^EOS$/) {
+       print "EOS\n";
+       next;
+    }
+
+    $tag = "I";
+    if (/^\*/) {
+       $tag = "B";
+       $_ = <>;
+       chomp;
+    }
+
+    my @a = split();
+    my @b = split(/-/,$a[3]);
+    
+    for $i (0..3) {
+      $b[$i] = "*" if ($b[$i] eq "");
+    }
+    
+    $a[4] = "*" if (! $a[4]);
+    $a[5] = "*" if (! $a[5]);
+    
+    print "$a[0] $b[0] $b[1] $b[2] $b[3] $a[4] $a[5] $tag\n";
+}

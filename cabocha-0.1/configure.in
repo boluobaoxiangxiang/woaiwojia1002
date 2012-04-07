@@ -1,0 +1,117 @@
+AC_INIT(src/cabocha.cc)
+AM_INIT_AUTOMAKE(cabocha, 0.1)
+AM_MAINTAINER_MODE
+
+# Before making a release, the LTVERSION string should be modified.
+# The string is of the form C:R:A.
+# - If interfaces have been changed or added, but binary compatibility has
+#   been preserved, change to C+1:0:A+1
+# - If binary compatibility has been broken (eg removed or changed interfaces)
+#   change to C+1:0:0
+# - If the interface is the same as the previous version, change to C:R+1:A
+LTVERSION="0:0:0"
+AC_SUBST(LTVERSION)
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_GCC_TRADITIONAL
+AC_PROG_MAKE_SET
+AC_LIBTOOL_WIN32_DLL
+AM_PROG_LIBTOOL
+AC_ISC_POSIX
+AC_CYGWIN
+AC_LANG_CPLUSPLUS
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(string.h getopt.h stdlib.h windows.h dlfcn.h)
+AC_CHECK_FUNCS(getenv)
+AC_CHECK_FUNCS(getopt)
+AC_CHECK_FUNCS(getopt_long)
+AC_CHECK_FUNCS(memset)
+AC_CHECK_LIB(dl,dlopen)
+
+if test -n "$GCC"; then
+   CFLAGS="-O3 -Wall"
+   CXXFLAGS="-O3 -Wall"
+fi
+
+AC_ARG_WITH(
+  yamcha-config,
+  [  --with-yamcha-config=PATH  set yamcha-config location [search path]],
+  AC_MSG_RESULT(using $with_yamcha_config for yamcha-config)
+  YAMCHA_CONFIG=$with_yamcha_config,
+  [AC_PATH_PROGS(YAMCHA_CONFIG, yamcha-config, no)]
+)
+
+AC_ARG_WITH(
+  chasen-config,
+  [  --with-chasen-config=PATH  set chasen-config location [search path]],
+  AC_MSG_RESULT(using $with_chasen_config for chasen-config)
+  chasen_CONFIG=$with_chasen_config,
+  [AC_PATH_PROGS(CHASEN_CONFIG, chasen-config, no)]
+)
+
+if test $YAMCHA_CONFIG = "no";
+then
+   AC_MSG_ERROR(YamCha is required for making CaboCha
+       see http://cl.aist-nara.ac.jp/~taku-ku/software/yamcha/)
+fi
+
+if test $CHASEN_CONFIG != "no";
+then
+  DEFAULT_INPUT_LAYER=0
+  CHASEN_CFLAGS="-DHAVE_LIBCHASEN"
+else
+  DEFAULT_INPUT_LAYER=1
+  AC_MSG_WARN(ChaSen not found: not support to parse from RAW sentence)
+fi  
+
+YAMCHA_CFLAGS=`$YAMCHA_CONFIG --cflags`
+YAMCHA_LIBS=`$YAMCHA_CONFIG --libs`
+YAMCHA_LIBEXEC_DIR=`$YAMCHA_CONFIG --libexecdir`
+CABOCHA_TXTMODEL_LIST=`(cd model; echo *.txtmodel.gz)`
+
+case "$host_os" in
+ mingw* | os2*)
+  CABOCHA_DEFAULT_RC='c:\\\\cabocha\\\\etc\\\\cabocharc'
+  CABOCHA_MODEL_LIST=`(cd model; echo *.txtmodel.gz | sed s/.txtmodel.gz/.sjis-model/g)`
+  ;;
+ *)
+  CABOCHA_DEFAULT_RC="$sysconfdir/cabocharc"
+  CABOCHA_MODEL_LIST=`(cd model; echo *.txtmodel.gz | sed s/.txtmodel.gz/.model/g)`
+  ;;
+esac
+
+AC_SUBST(DEFAULT_INPUT_LAYER)
+AC_SUBST(CHASEN_CFLAGS)
+AC_SUBST(YAMCHA_CFLAGS)
+AC_SUBST(YAMCHA_LIBS)
+AC_SUBST(YAMCHA_LIBEXEC_DIR)
+AC_SUBST(CABOCHA_DEFAULT_RC)
+AC_SUBST(CABOCHA_TXTMODEL_LIST)
+AC_SUBST(CABOCHA_MODEL_LIST)
+AC_SUBST(CABOCHA_WIN_MODEL_LIST)
+
+AM_CONFIG_HEADER(config.h)
+AC_OUTPUT([Makefile
+          src/Makefile
+	  model/Makefile
+	  man/Makefile
+	  doc/Makefile
+	  tests/Makefile
+	  cabocha-config
+	  training/Makefile
+	  libexec/Makefile
+	  ruby/extconf.rb
+	  perl/Makefile.PL
+	  cabocha.spec
+	  cabocharc
+	  libexec/IPA-conv.pl
+	  libexec/JUMAN-conv.pl	  
+	  ],
+	  chmod +x cabocha-config \
+	  libexec/IPA-conv.pl \
+	  libexec/JUMAN-conv.pl	  
+	  )

@@ -1,0 +1,42 @@
+#
+#  $Id: Makefile.in,v 1.1 2001/06/28 17:27:15 taku-ku Exp $;
+#
+prefix       = @prefix@
+TOOLDIR      = @YAMCHA_LIBEXEC_DIR@
+SVM_PARAM    = -t 1 -d 3 -c 1
+INPUT_LAYER  = 2
+OUTPUT_LAYER = 4
+CORPUS       =
+MODEL        =
+TAGPARAM     = __DEFAULT__=D O=O
+#TAGPARAM    = "__NOCONV__"
+
+CABOCHA = @prefix@/bin/cabocha
+
+all:
+	echo "Usage: make CORPUS=Your-Corpus-File MODEL=Model-Prefix-Name train"
+
+train: select convert learn zip compile
+
+select:
+	$(CABOCHA) -I$(INPUT_LAYER) -O$(OUTPUT_LAYER) -t1 < $(CORPUS) | $(TOOLDIR)/selecttag "$(TAGPARAM)" > $(MODEL).data
+
+convert:
+	make -f $(TOOLDIR)/Makefile MODEL="$(MODEL)" convert
+
+learn:
+	make -f $(TOOLDIR)/Makefile MODEL="$(MODEL)" SVM_PARAM="$(SVM_PARAM)" learn
+
+zip:
+	make -f $(TOOLDIR)/Makefile MODEL="$(MODEL)" zip 
+
+compile:
+	make -f $(TOOLDIR)/Makefile MODEL="$(MODEL)" compile
+
+install:
+	@INSTALL@ -m 644 Makefile $(prefix)/libexec/cabocha/Makefile
+
+check:
+clean:
+distclean:
+distdir:

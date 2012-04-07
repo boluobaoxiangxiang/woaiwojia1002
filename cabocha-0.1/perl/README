@@ -1,0 +1,13 @@
+cabocha perl モジュール
+
+1. インストール
+
+   % perl Makefile.PL
+   % make
+   % su
+   # make install
+
+2. 使い方.
+
+   man CaboCha
+  もしくは, 付属の test.pl を参照ください
